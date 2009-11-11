@@ -324,7 +324,7 @@ void init_crack_task(crack_task* task)
 //compare
 int compare_hash(char* key, char* hash, enum algo_num algo)
 {
-	char* key_hash;
+	char* key_hash = NULL;
 	
 	switch(algo)
 	{
