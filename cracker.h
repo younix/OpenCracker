@@ -18,6 +18,9 @@
 #include <pthread.h>
 #include <ctype.h>
 
+/* algorithm */
+#include "algo/crypt.h"
+
 // Define a cracing task and all attribus which related on this
 typedef struct {
 	unsigned int base;
@@ -41,7 +44,7 @@ typedef struct {
 	crack_task task;
 } thread_info;
 
-enum algo_num {md5, blowfish, sha1, sha224, sha256, sha384, sha512};
+enum algo_num {crypt};
 
 unsigned long long int keyrange(crack_task);
 void keynr_2_key(crack_task, int, char**);

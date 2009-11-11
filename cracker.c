@@ -242,7 +242,7 @@ void* start_crack_task(void* arg)
 unsigned long long int keyrange(crack_task crack)
 {
 	int i;
-	int keyrange = 0;
+	long long int keyrange = 0;
 	for(i = 0; i <= crack.keysize_max; ++i)
 		keyrange += pow(crack.base, i);
 	
@@ -322,10 +322,14 @@ void init_crack_task(crack_task* task)
 }
 
 //compare
-int compare_hash(char* key, char* hash)
+int compare_hash(char* key, char* hash, enum algo_num algo)
 {
 	char* key_hash;
-	key_hash = (char*) crypt(key, hash);
+	
+	switch(algo)
+	{
+		case crypt: key_hash = (char*) crypt(key, hash); break;
+	}
 
 	if(strncmp(key_hash, hash, strlen(key_hash)) == 0)
 	{
