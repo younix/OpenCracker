@@ -167,14 +167,14 @@ int calculate_sub_task(crack_task* task, crack_task* subtask, int thread_number,
 }
 
 // convert a position of a key in the keyrange to the spezific key
-void keynr_2_key(crack_task crack, int key_nr, char **key)
+void keynr_2_key(crack_task task, int key_nr, char **key)
 {
 	int char_nr = 0;
 	int i = 0;
 	int keylen = 0;
 
 	if(*key == NULL)
-		*key = (char*) calloc(crack.keysize_max + 1, sizeof(char));
+		*key = (char*) calloc(task.keysize_max + 1, sizeof(char));
 	
 	if(key_nr == 0)
 	{
@@ -182,14 +182,14 @@ void keynr_2_key(crack_task crack, int key_nr, char **key)
 		return;
 	}
 	
-	for(keylen = 0; key_nr >= pow(crack.base, keylen); ++keylen)
-		key_nr -= pow(crack.base, keylen);
+	for(keylen = 0; key_nr >= pow(task.base, keylen); ++keylen)
+		key_nr -= pow(task.base, keylen);
 	
 	do
 	{
-		char_nr = key_nr % crack.base;
-		key_nr = key_nr / crack.base;
-		(*key)[i] = crack.charset[char_nr];
+		char_nr = key_nr % task.base;
+		key_nr = key_nr / task.base;
+		(*key)[i] = task.charset[char_nr];
 		i++;
 	}
 	while(key_nr != 0 || strlen(*key) != keylen);
@@ -329,6 +329,7 @@ int compare_hash(char* key, char* hash, enum algo_num algo)
 	switch(algo)
 	{
 		case crypt: key_hash = (char*) crypt(key, hash); break;
+		case default: printf("Not implemented jet!\n"); break;
 	}
 
 	if(strncmp(key_hash, hash, strlen(key_hash)) == 0)

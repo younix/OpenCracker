@@ -28,7 +28,7 @@ typedef struct {
 	char* charset;
 	char* hash;
 	char* salt;
-	unsigned int algorithm;
+	enum algo_num algorithm;
 
 	//additional information
 	unsigned long long int keyrange;
@@ -44,7 +44,7 @@ typedef struct {
 	crack_task task;
 } thread_info;
 
-enum algo_num {crypt};
+enum algo_num {crypt = 0, md5};
 
 unsigned long long int keyrange(crack_task);
 void keynr_2_key(crack_task, int, char**);
