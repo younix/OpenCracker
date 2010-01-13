@@ -134,6 +134,7 @@ int main( int argc, char **argv)
 	return 0;
 }
 
+// TODO: open a listening socket and delegate the client requests
 int start_server(crack_task task, char* location)
 {
 	
@@ -307,7 +308,7 @@ int ben_next_key(crack_task crack, char *key) {
 	return 0;
 }
 
-// set a task to zero
+//set a task to zero
 void init_crack_task(crack_task* task)
 {
 	task->base = 0;
@@ -321,7 +322,7 @@ void init_crack_task(crack_task* task)
 	task->keyarea_size = 0;
 }
 
-//compare
+//convert the key by algo and compare it with the given hash
 int compare_hash(char* key, char* hash, enum algo_num algo)
 {
 	char* key_hash = NULL;
