@@ -34,6 +34,7 @@ int main( int argc, char **argv)
 		{"file"		, 1, NULL, 'f'},
 		{"threads"	, 1, NULL, 't'},
 		{"server"	, 0, NULL, 's'},
+		{"config"	, 1, NULL, ''},
 		{0, 0, 0, 0}
 	};
 
@@ -141,6 +142,12 @@ int start_server(crack_task task, char* location)
 	return 0;
 }
 
+int read_config(config_option config, )
+{
+
+}
+
+//
 int calculate_sub_task(crack_task* task, crack_task* subtask, int thread_number, int tnum)
 {
 	int keynr_beginn = 0;

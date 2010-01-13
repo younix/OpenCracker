@@ -23,26 +23,33 @@
 
 // Define a cracing task and all attribus which related on this
 typedef struct {
-	unsigned int base;
-	unsigned int keysize_max;
+	uint16_t base;
+	uint64_t keysize_max;
 	char* charset;
 	char* hash;
 	char* salt;
 	enum algo_num algorithm;
 
 	//additional information
-	unsigned long long int keyrange;
+	uint64_t keyrange;
 
 	// for splitting calculation, e.g. threading or distributed computing
 	char* start_key;
-	unsigned int keyarea_size;
+	uint64_t keyarea_size;
 } crack_task;
 
 typedef struct {
 	pthread_t thread_id;
-	int thread_num;
+	uint8_t thread_num;
 	crack_task task;
 } thread_info;
+
+typedef struct {
+	char* config_file;
+	uint8_t deamon;
+	crack_task* task;
+
+} config_options;
 
 enum algo_num {crypt = 0, md5};
 
