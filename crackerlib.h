@@ -34,8 +34,8 @@ typedef struct {
 	uint64_t keyrange;
 
 	// for splitting calculation, e.g. threading or distributed computing
-	char* start_key;		// a single task starts here
-	uint64_t keyarea_size;		// and run until 
+	char* start_key;
+	uint64_t keyarea_size;
 } crack_task;
 
 typedef struct {
@@ -59,7 +59,6 @@ void keynr_2_key(crack_task, int, char**);
 int get_next_key(crack_task, char*, int);
 int ben_next_key(crack_task, char*);
 int compare_hash(char*, char*);
-void usage(void);
 void* start_crack_task(void*);
 void init_crack_task(crack_task*);
 int calculate_sub_task(crack_task*, crack_task*, int, int);

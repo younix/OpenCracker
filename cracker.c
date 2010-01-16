@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
-/* Netzwork */
+/* Network */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,7 +10,7 @@
 
 #include "cracker.h"
 
-int main( int argc, char **argv)
+int main(int argc, char **argv)
 {
 	crack_task task;
 	int option = 0;
@@ -21,10 +21,79 @@ int main( int argc, char **argv)
 	int tnum = 0; // counter for for-loops
 	thread_info *tinfo;
 
-	// initilize crack struct
+	// initialize task
 	init_crack_task( &task);
+	
+	config_options config;
 
-	// define commandline options
+	parse_argument(argc, argv, config);
+
+	if(config.config_file != NULL)
+		read_config_file(config);
+	
+	// calculating and checking of user inputs
+	task.keyrange = keyrange(task);
+	printf("test\n\n");
+	if(thread_number < 1)
+		thread_number = 1;
+	
+	if(task.hash == NULL)
+	{
+		usage();
+		return -1;
+	}
+
+	if(task.charset == NULL)
+	{
+		task.charset = (char*) calloc(sizeof(char), 4);
+		strncpy(task.charset, "abc", 3);
+	}
+
+	// TODO: find a nice solution for this workaround
+	div_t blub = div( task.keyrange, thread_number);
+	task.keyarea_size = blub.quot;
+	
+	tinfo = calloc(thread_number, sizeof(thread_info));
+	if(tinfo == NULL)
+		printf("error: tinfo == NULL\n\n");;
+
+	for(tnum = 0; tnum < thread_number; ++tnum)
+	{
+		tinfo[tnum].thread_num = tnum + 1;
+		calculate_sub_task(&task, &tinfo[tnum].task, thread_number, tnum);
+
+		status = pthread_create(&tinfo[tnum].thread_id, NULL, &start_crack_task, &tinfo[tnum].task);
+	}
+
+	for(tnum = 0; tnum < thread_number; ++tnum)
+	{
+		status = pthread_join(tinfo[tnum].thread_id, &key);
+
+		if(key != NULL)
+			printf("Find: \"%s\"\n\n", (char*) key);
+		else
+			printf("Not Found!\n\n");
+	}
+	
+	if(key != NULL)
+		free(key);
+	
+	if(task.hash != NULL)
+		free(task.hash);
+	
+	if(task.charset != NULL)
+		free(task.hash);
+	
+	if(tinfo != NULL)
+		free(tinfo);
+
+	return 0;
+}
+
+// parse the command line arguments
+int argc_parser(int argc, char **argv, config_options *config)
+{
+	// define command line options
 	struct option long_options[] =
 	{
 		{"help"		, 0, NULL, 'h'},
@@ -38,7 +107,7 @@ int main( int argc, char **argv)
 		{0, 0, 0, 0}
 	};
 
-	// analysing commandline options
+	// analysing command line options
 	while((option = getopt_long( argc, argv, "ha:c:l:f:t:s::", long_options, &optionindex)) != -1)
 	{
 		switch (option)
@@ -75,7 +144,7 @@ int main( int argc, char **argv)
 				break;
 
 			case 's':
-				printf("This feature is noch implemented!\n");
+				printf("This feature is not implemented!\n");
 				break;
 
 			case 'h':
@@ -84,125 +153,33 @@ int main( int argc, char **argv)
 				break;
 		}
 	}
-	
-	// calculating and checking of user inputs
-	task.keyrange = keyrange(task);
-	printf("test\n\n");
-	if(thread_number < 1)
-		thread_number = 1;
-	
-	if(task.hash == NULL)
-	{
-		usage();
-		return -1;
-	}
-
-	if(task.charset == NULL)
-	{
-		task.charset = (char*) calloc(sizeof(char), 4);
-		strncpy(task.charset, "abc", 3);
-	}
-
-	// ToDo: find a nice solution for this workaround
-	div_t blub = div( task.keyrange, thread_number);
-	task.keyarea_size = blub.quot;
-	
-	tinfo = calloc(thread_number, sizeof(thread_info));
-	if(tinfo == NULL)
-		printf("error: tinfo == NULL\n\n");;
-
-	for(tnum = 0; tnum < thread_number; ++tnum)
-	{
-		tinfo[tnum].thread_num = tnum + 1;
-		calculate_sub_task(&task, &tinfo[tnum].task, thread_number, tnum);
-
-		status = pthread_create(&tinfo[tnum].thread_id, NULL, &start_crack_task, &tinfo[tnum].task);
-	}
-
-	for(tnum = 0; tnum < thread_number; ++tnum)
-	{
-		status = pthread_join(tinfo[tnum].thread_id, &key);
-
-		if(key != NULL)
-			printf("Find: \"%s\"\n\n", (char*) key);
-		else
-			printf("Not Found!\n\n");
-	}
-	
-	if(key != NULL)
-		free(key);
 
 	return 0;
 }
 
 // TODO: open a listening socket and delegate the client requests
+// TODO: the whole client-server communication have to be encrypted
 int start_server(crack_task task, char* location)
 {
 	
 	return 0;
 }
 
-int read_config(config_option config, )
+// read configuration file and set the config
+int read_config(config_option config, char *filename)
 {
+	FILE* fh = fopen(filename, "r");
+	
+	if(fh == NULL)
+		return -1;
 
-}
-
-//
-int calculate_sub_task(crack_task* task, crack_task* subtask, int thread_number, int tnum)
-{
-	int keynr_beginn = 0;
-
-	init_crack_task(subtask);
-
-	if(task->charset 	!= NULL) subtask->charset 	= (char*) calloc(strlen(task->charset) 	+ 1, sizeof(char));
-	if(task->hash 		!= NULL) subtask->hash 		= (char*) calloc(strlen(task->hash)  	+ 1, sizeof(char));
-	if(task->salt   	!= NULL) subtask->salt 		= (char*) calloc(strlen(task->salt) 	+ 1, sizeof(char));
-
-	if(task->charset 	!= NULL) strncpy(subtask->charset, task->charset, task->base);
-	if(task->hash		!= NULL) strncpy(subtask->hash, task->hash, strlen(task->hash));
-	if(task->salt		!= NULL) strncpy(subtask->salt, task->salt, strlen(task->salt));
-
-	subtask->base 		= task->base;
-	subtask->keysize_max 	= task->keysize_max;
-	subtask->algorithm 	= task->algorithm;
-	subtask->keyrange	= task->keyrange;
-	subtask->keyarea_size	= task->keyarea_size;
-
-	keynr_beginn = task->keyarea_size * tnum;
-	keynr_2_key(*task, keynr_beginn, &subtask->start_key);
+	fgets(fh);
+	fclose(fh);
 
 	return 0;
 }
 
-// convert a position of a key in the keyrange to the spezific key
-void keynr_2_key(crack_task task, int key_nr, char **key)
-{
-	int char_nr = 0;
-	int i = 0;
-	int keylen = 0;
-
-	if(*key == NULL)
-		*key = (char*) calloc(task.keysize_max + 1, sizeof(char));
-	
-	if(key_nr == 0)
-	{
-		*key[0] = '\0';
-		return;
-	}
-	
-	for(keylen = 0; key_nr >= pow(task.base, keylen); ++keylen)
-		key_nr -= pow(task.base, keylen);
-	
-	do
-	{
-		char_nr = key_nr % task.base;
-		key_nr = key_nr / task.base;
-		(*key)[i] = task.charset[char_nr];
-		i++;
-	}
-	while(key_nr != 0 || strlen(*key) != keylen);
-}
-
+// print a message about the command line arguments
 void usage(void)
 {
 	const char* usage_str =
@@ -215,136 +192,4 @@ void usage(void)
 	"-f, --file <FILE>        Password file (like /etc/shadow)\n";
 
 	printf("%s", usage_str);
-}
-
-// single cracking thread
-void* start_crack_task(void* arg)
-{
-	char* key;
-	crack_task* task = (crack_task *) arg;
-
-	int counter = 0;
-	key = (char*) calloc(sizeof(char), task->keysize_max + 1);
-	
-	if(task->start_key != NULL)
-		strncpy(key, task->start_key, task->keysize_max);
-	
-	do
-	{
-		if(compare_hash(key, task->hash) == 1)
-		{
-			printf("Thread found Key: %s\n hash:%s\n\n", key, task->hash);
-			return key;
-		}
-		++counter;
-	}
-	while(get_next_key(*task, key, 0) == 0 && counter <= task->keyarea_size);
-	//while(ben_next_key(crack, key) == 0); // second implementation
-
-	free(key);
-
-	return NULL; 
-}
-
-//calculate the keyrange
-unsigned long long int keyrange(crack_task crack)
-{
-	int i;
-	long long int keyrange = 0;
-	for(i = 0; i <= crack.keysize_max; ++i)
-		keyrange += pow(crack.base, i);
-	
-	return keyrange;
-}
-
-//increas the key by one
-int get_next_key(crack_task crack, char* key, int pos)
-{
-	int i = 0;
-	
-	for(i = 0; i < crack.base; ++i)
-	{
-		if(key[pos] == crack.charset[i])
-		{
-			if((i + 1) < crack.base)
-			{
-				key[pos] = crack.charset[i+1];
-				return 0;
-			}
-			else
-			{
-				key[pos] = crack.charset[0];
-				if((pos + 1) < crack.keysize_max)
-					return get_next_key(crack, key, pos + 1);
-				else
-					return -1;;
-			}
-		}
-	}
-
-	key[pos] = crack.charset[0];
-
-	return 0;
-}
-
-//ben's version of next string
-int ben_next_key(crack_task crack, char *key) {
-	int i;
-	int l = strlen(key);
-	for (i = 0; i < l; ++i) { 
-		if (key[i] == crack.charset[crack.base-1]) {
-			if (i >= crack.keysize_max-1)
-				return -1;
-			key[i] = crack.charset[0];
-			if (i == l-1) {
-				key[i+1] = crack.charset[0];
-				// should be ensured by calloc, but safety first!
-				key[i+2] = '\0';
-				// not needed (for loop would end NOW also without this) - but for readability of the algorithm
-				break;
-			}
-		} else {
-			key[i] = *(strchr(crack.charset, key[i])+1);
-			break;
-		}
-	}
-	// just a little feature, if a empty key is given
-	// the first character in the base is used as first key
-	if (l == 0)
-		key[0] = crack.charset[0];
-	return 0;
-}
-
-//set a task to zero
-void init_crack_task(crack_task* task)
-{
-	task->base = 0;
-	task->keysize_max = 0;
-	task->charset = NULL;
-	task->hash = NULL;
-	task->salt = NULL;
-	task->algorithm = 0;
-	task->keyrange = 0;
-	task->start_key = NULL;
-	task->keyarea_size = 0;
-}
-
-//convert the key by algo and compare it with the given hash
-int compare_hash(char* key, char* hash, enum algo_num algo)
-{
-	char* key_hash = NULL;
-	
-	switch(algo)
-	{
-		case crypt: key_hash = (char*) crypt(key, hash); break;
-		case default: printf("Not implemented jet!\n"); break;
-	}
-
-	if(strncmp(key_hash, hash, strlen(key_hash)) == 0)
-	{
-		//printf("Key found: \"%s\" hash: \"%s\"\n\n", key, key_hash);
-		return 1;
-	}
-	
-	return 0;
 }
