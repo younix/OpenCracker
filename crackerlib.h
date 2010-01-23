@@ -1,10 +1,11 @@
-#ifndef CRACK_H
-#define CRACK_H
+#ifndef CRACKLIB_H
+#define CRACKLIB_H
 
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 //#ifdef LINUX
 #include <crypt.h>
@@ -20,6 +21,8 @@
 
 /* algorithm */
 #include "algo/crypt.h"
+
+enum algo_num {gnu_crypt = 0, md5, md4, md2, sha512};
 
 // Define a cracking task and all attribute which related on this
 typedef struct {
@@ -44,23 +47,15 @@ typedef struct {
 	crack_task task;
 } thread_info;
 
-typedef struct {
-	char* config_file;
-	uint8_t deamon;
-	server_addr;
-	crack_task* task;
-
-} config_options;
-
-enum algo_num {crypt = 0, md5, md4, md2, sha512};
 
 unsigned long long int keyrange(crack_task);
 void keynr_2_key(crack_task, int, char**);
 int get_next_key(crack_task, char*, int);
 int ben_next_key(crack_task, char*);
-int compare_hash(char*, char*);
+int compare_hash(char*, char*, enum algo_num);
 void* start_crack_task(void*);
 void init_crack_task(crack_task*);
+void free_crack_task(crack_task*);
 int calculate_sub_task(crack_task*, crack_task*, int, int);
 
 #endif

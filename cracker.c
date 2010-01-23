@@ -1,41 +1,28 @@
-#include <unistd.h>
-#include <getopt.h>
-
-/* Network */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
 #include "cracker.h"
 
 int main(int argc, char **argv)
 {
+	//-- initialisation --//
 	crack_task task;
-	int option = 0;
-	int optionindex = 0;
-	void* key; // returned key
 	int status = 0;
-	int thread_number = 1; // user defined number of threads
 	int tnum = 0; // counter for for-loops
+	char* key;
 	thread_info *tinfo;
 
 	// initialize task
-	init_crack_task( &task);
+	init_crack_task(&task);
 	
 	config_options config;
-
-	parse_argument(argc, argv, config);
+	parse_argument(argc, argv, &config, &task);
 
 	if(config.config_file != NULL)
-		read_config_file(config);
+		read_config_file(&config, "config.cfg");
 	
 	// calculating and checking of user inputs
 	task.keyrange = keyrange(task);
-	printf("test\n\n");
-	if(thread_number < 1)
-		thread_number = 1;
+
+	if(config.thread_number < 1)
+		config.thread_number = 1;
 	
 	if(task.hash == NULL)
 	{
@@ -50,24 +37,24 @@ int main(int argc, char **argv)
 	}
 
 	// TODO: find a nice solution for this workaround
-	div_t blub = div( task.keyrange, thread_number);
+	div_t blub = div( task.keyrange, config.thread_number);
 	task.keyarea_size = blub.quot;
 	
-	tinfo = calloc(thread_number, sizeof(thread_info));
+	tinfo = calloc(config.thread_number, sizeof(thread_info));
 	if(tinfo == NULL)
 		printf("error: tinfo == NULL\n\n");;
 
-	for(tnum = 0; tnum < thread_number; ++tnum)
+	for(tnum = 0; tnum < config.thread_number; ++tnum)
 	{
 		tinfo[tnum].thread_num = tnum + 1;
-		calculate_sub_task(&task, &tinfo[tnum].task, thread_number, tnum);
+		calculate_sub_task(&task, &tinfo[tnum].task, config.thread_number, tnum);
 
 		status = pthread_create(&tinfo[tnum].thread_id, NULL, &start_crack_task, &tinfo[tnum].task);
 	}
 
-	for(tnum = 0; tnum < thread_number; ++tnum)
+	for(tnum = 0; tnum < config.thread_number; ++tnum)
 	{
-		status = pthread_join(tinfo[tnum].thread_id, &key);
+		status = pthread_join(tinfo[tnum].thread_id, (void**) &key);
 
 		if(key != NULL)
 			printf("Find: \"%s\"\n\n", (char*) key);
@@ -91,8 +78,10 @@ int main(int argc, char **argv)
 }
 
 // parse the command line arguments
-int argc_parser(int argc, char **argv, config_options *config)
+void parse_argument(int argc, char **argv, config_options *config, crack_task *task)
 {
+	int option = 0;
+	int optionindex = 0;
 	// define command line options
 	struct option long_options[] =
 	{
@@ -103,7 +92,7 @@ int argc_parser(int argc, char **argv, config_options *config)
 		{"file"		, 1, NULL, 'f'},
 		{"threads"	, 1, NULL, 't'},
 		{"server"	, 0, NULL, 's'},
-		{"config"	, 1, NULL, ''},
+		{"config"	, 1, NULL, 'C'},
 		{0, 0, 0, 0}
 	};
 
@@ -113,22 +102,22 @@ int argc_parser(int argc, char **argv, config_options *config)
 		switch (option)
 		{
 			case 'a':
-				task.hash = (char*) calloc(sizeof(char), strlen(optarg) + 1);
-				strncpy(task.hash, optarg, strlen(optarg));
+				task->hash = (char*) calloc(sizeof(char), strlen(optarg) + 1);
+				strncpy(task->hash, optarg, strlen(optarg));
 				break;
 
 			case 'c':
-				task.base = strlen(optarg);
-				task.charset = (char*) calloc(sizeof(char), task.base + 1);
-				strncpy(task.charset, optarg, task.base);
+				task->base = strlen(optarg);
+				task->charset = (char*) calloc(sizeof(char), task->base + 1);
+				strncpy(task->charset, optarg, task->base);
 				break;
 			
 			case 'l':
 				for(int i = 0; i < strlen(optarg); ++i)
 					if(isdigit(optarg[i]) == 0)
-						return -1;
+						exit(-1);
 
-				task.keysize_max = atoi(optarg);
+				task->keysize_max = atoi(optarg);
 				break;
 
 			case 'f':
@@ -138,9 +127,9 @@ int argc_parser(int argc, char **argv, config_options *config)
 			case 't':
 				for(int i = 0; i < strlen(optarg); ++i)
 					if(isdigit(optarg[i]) == 0)
-						return -1;
+						exit(-1);
 
-				thread_number = atoi(optarg);
+				config->thread_number = atoi(optarg);
 				break;
 
 			case 's':
@@ -153,8 +142,6 @@ int argc_parser(int argc, char **argv, config_options *config)
 				break;
 		}
 	}
-
-	return 0;
 }
 
 // TODO: open a listening socket and delegate the client requests
@@ -166,14 +153,14 @@ int start_server(crack_task task, char* location)
 }
 
 // read configuration file and set the config
-int read_config(config_option config, char *filename)
+int read_config_file(config_options *config, char *filename)
 {
 	FILE* fh = fopen(filename, "r");
 	
 	if(fh == NULL)
 		return -1;
 
-	fgets(fh);
+	//fgets(fh);
 	fclose(fh);
 
 	return 0;

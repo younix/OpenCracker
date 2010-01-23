@@ -1,14 +1,6 @@
 #include <unistd.h>
-#include <getopt.h>
 
-/* Netzwork */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include "cracker.h"
+#include "crackerlib.h"
 
 // divide the part of the whole key area
 int calculate_sub_task(crack_task* task, crack_task* subtask, int thread_number, int tnum)
@@ -47,7 +39,7 @@ void keynr_2_key(crack_task task, int key_nr, char **key)
 	if(*key == NULL)
 		*key = (char*) calloc(task.keysize_max + 1, sizeof(char));
 	
-	if(key_nr == 0)
+	if(key_nr == 0) 
 	{
 		*key[0] = '\0';
 		return;
@@ -80,7 +72,7 @@ void* start_crack_task(void* arg)
 	
 	do
 	{
-		if(compare_hash(key, task->hash) == 1)
+		if(compare_hash(key, task->hash, task->algorithm) == 1)
 		{
 			printf("Thread found Key: %s\n hash:%s\n\n", key, task->hash);
 			return key;
@@ -106,7 +98,7 @@ unsigned long long int keyrange(crack_task crack)
 	return keyrange;
 }
 
-//increas the key by one
+//increase the key by one
 int get_next_key(crack_task crack, char* key, int pos)
 {
 	int i = 0;
@@ -178,15 +170,24 @@ void init_crack_task(crack_task* task)
 	task->keyarea_size = 0;
 }
 
-//convert the key by algo and compare it with the given hash
+// free all elements
+void free_crack_task(crack_task* task)
+{
+	if(task->charset != NULL)	free(task->charset);
+	if(task->hash != NULL)		free(task->hash);
+	if(task->salt != NULL)		free(task->salt);
+	if(task->start_key != NULL)	free(task->start_key);
+}
+
+//convert the key by algorithm and compare it with the given hash
 int compare_hash(char* key, char* hash, enum algo_num algo)
 {
 	char* key_hash = NULL;
 	
 	switch(algo)
 	{
-		case crypt: key_hash = (char*) crypt(key, hash); break;
-		case default: printf("Not implemented jet!\n"); break;
+		case gnu_crypt: key_hash = (char*) crypt(key, hash); break;
+		default: printf("Not implemented jet!\n"); break;
 	}
 
 	if(strncmp(key_hash, hash, strlen(key_hash)) == 0)
