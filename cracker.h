@@ -34,6 +34,8 @@
 /* algorithm */
 #include "algo/crypt.h"
 
+#define STD_CONFIG_FILE
+
 typedef struct {
 	char* config_file;
 	uint8_t deamon;

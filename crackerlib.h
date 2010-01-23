@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 //#ifdef LINUX
 #include <crypt.h>
@@ -52,7 +53,7 @@ unsigned long long int keyrange(crack_task);
 void keynr_2_key(crack_task, int, char**);
 int get_next_key(crack_task, char*, int);
 int ben_next_key(crack_task, char*);
-int compare_hash(char*, char*, enum algo_num);
+bool compare_hash(char*, char*, enum algo_num);
 void* start_crack_task(void*);
 void init_crack_task(crack_task*);
 void free_crack_task(crack_task*);

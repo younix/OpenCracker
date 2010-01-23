@@ -180,7 +180,7 @@ void free_crack_task(crack_task* task)
 }
 
 //convert the key by algorithm and compare it with the given hash
-int compare_hash(char* key, char* hash, enum algo_num algo)
+bool compare_hash(char* key, char* hash, enum algo_num algo)
 {
 	char* key_hash = NULL;
 	
@@ -193,8 +193,8 @@ int compare_hash(char* key, char* hash, enum algo_num algo)
 	if(strncmp(key_hash, hash, strlen(key_hash)) == 0)
 	{
 		//printf("Key found: \"%s\" hash: \"%s\"\n\n", key, key_hash);
-		return 1;
+		return true;
 	}
 	
-	return 0;
+	return false;
 }

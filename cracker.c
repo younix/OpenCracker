@@ -12,29 +12,14 @@ int main(int argc, char **argv)
 	// initialize task
 	init_crack_task(&task);
 	
-	config_options config;
-	parse_argument(argc, argv, &config, &task);
+	config_options config;	// hold the configuration options 
+	parse_argument(argc, argv, &config, &task);	// parse user arguments from command line
 
-	if(config.config_file != NULL)
+	if(config.config_file != NULL)	// load configuration from file
 		read_config_file(&config, "config.cfg");
 	
 	// calculating and checking of user inputs
 	task.keyrange = keyrange(task);
-
-	if(config.thread_number < 1)
-		config.thread_number = 1;
-	
-	if(task.hash == NULL)
-	{
-		usage();
-		return -1;
-	}
-
-	if(task.charset == NULL)
-	{
-		task.charset = (char*) calloc(sizeof(char), 4);
-		strncpy(task.charset, "abc", 3);
-	}
 
 	// TODO: find a nice solution for this workaround
 	div_t blub = div( task.keyrange, config.thread_number);
@@ -65,14 +50,10 @@ int main(int argc, char **argv)
 	if(key != NULL)
 		free(key);
 	
-	if(task.hash != NULL)
-		free(task.hash);
-	
-	if(task.charset != NULL)
-		free(task.hash);
-	
 	if(tinfo != NULL)
 		free(tinfo);
+
+	free_crack_task(&task);
 
 	return 0;
 }
