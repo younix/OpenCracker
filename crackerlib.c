@@ -72,7 +72,7 @@ void* start_crack_task(void* arg)
 	
 	do
 	{
-		if(compare_hash(key, task->hash, task->algorithm) == 1)
+		if(compare_hash(key, task->hash, task->algorithm) == true)
 		{
 			printf("Thread found Key: %s\n hash:%s\n\n", key, task->hash);
 			return key;

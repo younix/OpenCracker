@@ -5,7 +5,6 @@ int main(int argc, char **argv)
 	//-- initialisation --//
 	crack_task task;
 	int status = 0;
-	int tnum = 0; // counter for for-loops
 	char* key;
 	thread_info *tinfo;
 
@@ -29,7 +28,7 @@ int main(int argc, char **argv)
 	if(tinfo == NULL)
 		printf("error: tinfo == NULL\n\n");;
 
-	for(tnum = 0; tnum < config.thread_number; ++tnum)
+	for(int tnum = 0; tnum < config.thread_number; ++tnum)
 	{
 		tinfo[tnum].thread_num = tnum + 1;
 		calculate_sub_task(&task, &tinfo[tnum].task, config.thread_number, tnum);
@@ -37,7 +36,7 @@ int main(int argc, char **argv)
 		status = pthread_create(&tinfo[tnum].thread_id, NULL, &start_crack_task, &tinfo[tnum].task);
 	}
 
-	for(tnum = 0; tnum < config.thread_number; ++tnum)
+	for(int tnum = 0; tnum < config.thread_number; ++tnum)
 	{
 		status = pthread_join(tinfo[tnum].thread_id, (void**) &key);
 
@@ -137,9 +136,19 @@ int start_server(crack_task task, char* location)
 int read_config_file(config_options *config, char *filename)
 {
 	FILE* fh = fopen(filename, "r");
-	
+
 	if(fh == NULL)
 		return -1;
+	
+	char *line;
+	line = (char*) calloc(100, sizeof(char));
+
+	while (!feof(fh)) {
+		
+		fgets(line, 99, fh);
+		scanf();
+	}
+
 
 	//fgets(fh);
 	fclose(fh);
