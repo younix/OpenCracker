@@ -14,8 +14,8 @@ int main(int argc, char **argv)
 	config_options config;	// hold the configuration options 
 	parse_argument(argc, argv, &config, &task);	// parse user arguments from command line
 
-	if(config.config_file != NULL)	// load configuration from file
-		read_config_file(&config, "config.cfg");
+	if(read_config_file(&config))
+		printf("unable to read config file.\n");
 	
 	// calculating and checking of user inputs
 	task.keyrange = keyrange(task);
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-// parse the command line arguments
+// parse the command line arguments and save them in struct config
 void parse_argument(int argc, char **argv, config_options *config, crack_task *task)
 {
 	int option = 0;
@@ -132,28 +132,49 @@ int start_server(crack_task task, char* location)
 	return 0;
 }
 
-// read configuration file and set the config
-int read_config_file(config_options *config, char *filename)
+// read configuration file and save optons to config
+bool read_config_file(config_options *config)
 {
-	FILE* fh = fopen(filename, "r");
+	char* option;
+	char* value;
+	FILE* fh;
+	
+	option = (char*) calloc(100, sizeof(char));
+	value  = (char*) calloc(100, sizeof(char));
+
+	if(config->config_file == NULL)
+		fh = fopen(CONFIG_FILE, "r");
+	else
+		fh = fopen(config->config_file, "r");
 
 	if(fh == NULL)
-		return -1;
+		return false;
 	
 	char *line;
 	line = (char*) calloc(100, sizeof(char));
 
 	while (!feof(fh)) {
 		
-		fgets(line, 99, fh);
-		scanf();
+		//fgets(line, 99, fh);
+
+		//this is an unsave way of doing this
+		//TODO: find a better way
+		fscanf(fh, "%s = %s", option, value);
+
+		set_config_option(config, option, value);
 	}
 
 
 	//fgets(fh);
 	fclose(fh);
 
-	return 0;
+	return true;
+}
+
+bool set_config_option(config_options *config, char *option, char *value)
+{
+	
+	return true;
 }
 
 // print a message about the command line arguments

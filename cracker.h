@@ -34,7 +34,8 @@
 /* algorithm */
 #include "algo/crypt.h"
 
-#define STD_CONFIG_FILE
+#define CONFIG_FILE "~/.opencracker"
+#define VERSION "alpha"
 
 typedef struct {
 	char* config_file;
@@ -48,6 +49,7 @@ typedef struct {
 
 void usage(void);
 void parse_argument(int argc, char **argv, config_options* config, crack_task* task);
-int read_config_file(config_options *config, char *filename);
+bool read_config_file(config_options *config);
+bool set_config_option(config_options *config, char *option, char *value);
 
 #endif
