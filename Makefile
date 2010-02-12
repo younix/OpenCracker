@@ -1,6 +1,12 @@
+CC=gcc
+CFLAGS= -std=c99 -pedantic -Wall
+LIBS= -lm -lcrypt -pthread
+
 cracker: cracker.c cracker.h crackerlib.c crackerlib.h
-	gcc -g -std=c99 -pedantic -Wall -o cracker cracker.c crackerlib.c -lm -lcrypt -pthread
+	$(CC) $(CFLAGS) $(LIBS) -o cracker cracker.c crackerlib.c
+debug: cracker.c cracker.h crackerlib.c crackerlib.h
+	$(CC) $(CFLAGS) $(LIBS) -o cracker cracker.c crackerlib.c -g
 obsd: cracker.c cracker.h
-	gcc -std=c99 -Wall -o cracker cracker.c algo/crypt.c -lm -pthread
+	$(CC) $(CFLAGS) -o cracker cracker.c algo/crypt.c -lm -pthread
 benchmark: benchmark.c
-	gcc -Wall -std=c99 -pedantic -o bench benchmark.c -lgnutls-openssl
+	$(CC) $(CFLAGS) -o bench benchmark.c -lgnutls-openssl
