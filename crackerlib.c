@@ -58,6 +58,11 @@ void keynr_2_key(crack_task task, int key_nr, char **key)
 	while(key_nr != 0 || strlen(*key) != keylen);
 }
 
+void key_2_keynr()
+{
+	
+}
+
 // single cracking thread
 void* start_crack_task(void* arg)
 {
