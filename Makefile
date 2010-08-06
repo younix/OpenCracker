@@ -1,7 +1,9 @@
 CC=gcc
-CFLAGS= -std=c99 -pedantic -Wall
-LIBS= -lm -lcrypt -pthread -g
+CFLAGS= -std=c99 -pedantic -Wall -Werror -O2
+LIBS= -lm
 
+keygen: keygen.c
+	$(CC) $(CFLAGS) $(LIBS) keygen.c -o keygen
 cracker: cracker.c cracker.h crackerlib.c crackerlib.h
 	$(CC) $(CFLAGS) $(LIBS) -o cracker cracker.c crackerlib.c
 debug: cracker.c cracker.h crackerlib.c crackerlib.h

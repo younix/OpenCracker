@@ -173,7 +173,7 @@ bool read_config_file(config_options *config)
 
 bool set_config_option(config_options *config, char *option, char *value)
 {
-	if( strcmp(option, "threads") && is_digit(option) )
+	if( strcmp(option, "threads") && isdigit(option) )
 	{
 		config->thread_nr = atoi(value);
 		return true;
