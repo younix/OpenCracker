@@ -77,6 +77,11 @@ int main(int argc, char** argv)
 		}
 	}
 
+	if (charset == NULL) {
+		usage();
+		exit(1);
+	}
+
 	base = strlen(charset);
 
 	if (end == 0)
