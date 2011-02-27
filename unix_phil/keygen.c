@@ -164,11 +164,10 @@ int get_next_key(int pos) {
 	return 0;
 }
 
-/* ben's version of next string */
+/* ben's version of next key */
 int ben_next_key(void) {
-	int i;
 	int l = strlen(key);
-	for (i = 0; i < l; ++i) { 
+	for (int i = 0; i < l; ++i) { 
 		if (key[i] == charset[base-1]) {
 			if (i >= keysize_max-1)
 				return -1;
