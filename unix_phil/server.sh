@@ -15,7 +15,7 @@ EOM
 
 /bin/env
 
-CAT << EOM
+cat << EOM
 </PRE>
 </SMALL>
 <P>

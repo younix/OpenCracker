@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #define _XOPEN_SOURCE 500
 #include <string.h>
 #include <getopt.h>
@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <math.h>
+#include <tgmath.h>
 #include <ctype.h>
 
-void usage(void);
+#define END_OF_KEYRANGE -1
+
+void usage(char*);
 void keynr_2_key(uint32_t);
 uint32_t keyrange(void);
 int get_next_key(int);
@@ -18,13 +20,13 @@ int ben_next_key(void);
 char *charset;
 char *key;
 uint32_t base;
-uint32_t keysize_max;
+uint32_t keylength_max;
 uint32_t start;
 uint32_t end;
 
 int main(int argc, char** argv)
 {
-	keysize_max=0;
+	keylength_max = 0;
 	start = 0;
 	end = 0;
 
@@ -54,7 +56,7 @@ int main(int argc, char** argv)
 					if(isdigit(optarg[i]) == 0)
 						exit(-1);
 
-				keysize_max = atoi(optarg);
+				keylength_max = atoi(optarg);
 				break;
 			case 's':
 				for(int i = 0; i < strlen(optarg); ++i)
@@ -65,20 +67,23 @@ int main(int argc, char** argv)
 				break;
 			case 'e':
 				for(int i = 0; i < strlen(optarg); ++i)
-					if(isdigit(optarg[i]) == 0)
+					if(isdigit(optarg[i]) == 0) {
+						usage(argv[0]);
 						exit(-1);
+					}
 
 				end = atoi(optarg);
 				break;
 			case 'h':
 			default:
-				usage();
+				usage(argv[0]);
+				exit(1);
 				break;
 		}
 	}
 
 	if (charset == NULL) {
-		usage();
+		usage(argv[0]);
 		exit(1);
 	}
 
@@ -104,8 +109,14 @@ int main(int argc, char** argv)
 	return -1;
 }
 
-void usage(void) {
-	printf("usage: -l -s -e\n");
+void usage(char* prog) {
+	printf( "usage: %s -c [OPTION...]\n"
+		"	-c, --charset	charset of the key\n"
+		"	-l, --lenght	maximum lenght of the key\n"
+		"	-s, --start	position of the first key\n"
+		"	-e, --end	position of the last key\n"
+		"	-h, --help	this help text\n"
+	, prog);
 }
 
 // convert a position of a key in the keyrange to the spezific key
@@ -116,7 +127,7 @@ void keynr_2_key(uint32_t key_nr)
 	int keylen = 0;
 
 	if(key == NULL)
-		key = (char*) calloc(keysize_max + 1, sizeof(char));
+		key = (char*) calloc(keylength_max + 1, sizeof(char));
 
 	if(key_nr == 0) {
 		key[0] = '\0';
@@ -139,7 +150,7 @@ uint32_t keyrange(void)
 {
 	int i;
 	long long int keyrange = 0;
-	for(i = 0; i <= keysize_max; ++i)
+	for(i = 0; i <= keylength_max; ++i)
 		keyrange += pow(base, i);
 
 	return keyrange;
@@ -162,10 +173,10 @@ int get_next_key(int pos)
 			else
 			{
 				key[pos] = charset[0];
-				if ((pos + 1) < keysize_max)
+				if ((pos + 1) < keylength_max)
 					return get_next_key(pos + 1);
 				else
-					return -1;
+					return END_OF_KEYRANGE;
 			}
 		}
 	}
@@ -181,7 +192,7 @@ int ben_next_key(void) {
 	int l = strlen(key);
 	for (i = 0; i < l; ++i) { 
 		if (key[i] == charset[base-1]) {
-			if (i >= keysize_max-1)
+			if (i >= keylength_max-1)
 				return -1;
 			key[i] = charset[0];
 			if (i == l-1) {
